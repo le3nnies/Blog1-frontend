@@ -1,6 +1,5 @@
-import { AnalyticsData, AnalyticsFilters, RealtimeMetrics, InsightsAndRecommendations, CommentsAnalytics, BackendAnalyticsData } from '@/types/analytics.types';
-
 // Analytics service using relative URLs (proxied by Vite)
+import { AnalyticsData, AnalyticsFilters, RealtimeMetrics, InsightsAndRecommendations, CommentsAnalytics, BackendAnalyticsData } from '@/types/analytics.types';
 
 // Helper function to get request options with cookie-based authentication
 const getRequestOptions = (method: string = 'GET', body?: any) => {
@@ -119,6 +118,18 @@ const getDashboardAnalytics = async (period: string) => {
   return result.data; // Return the data object as the component expects it
 };
 
+const getActiveSessions = async (limit: number = 50) => {
+  const response = await fetch(`/api/analytics/active-sessions?limit=${limit}`, getRequestOptions());
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Failed to fetch active sessions');
+  }
+
+  const result = await response.json();
+  return result.data;
+};
+
 export const analyticsService = {
   getAnalytics,
   getRealtimeMetrics,
@@ -126,4 +137,5 @@ export const analyticsService = {
   getSubscriberCount,
   getCommentsAnalytics,
   getDashboardAnalytics,
+  getActiveSessions,
 };

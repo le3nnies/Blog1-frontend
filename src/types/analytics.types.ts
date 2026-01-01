@@ -552,5 +552,14 @@ export interface BackendAnalyticsData {
       title: string;
       description: string;
     };
+    hourlyTraffic: {
+      data: Array<{
+        hour: number;
+        views: number;
+        uniqueVisitors: number;
+      }>;
+      title: string;
+      description: string;
+    };
   };
 }

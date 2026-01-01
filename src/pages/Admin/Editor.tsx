@@ -14,20 +14,28 @@ import { Article } from "@/data/articles.types";
 import { articleService } from "@/services/articleService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
+import AuthorSelect from "@/pages/Admin/AuthorSelect";
 
+interface Author {
+  _id: string;
+  username: string;
+  email: string;
+  avatar?: string;
+  bio?: string;
+  role: string;
+}
 const API_URL = import.meta.env.REACT_APP_API_BASE_URL;
 
-
-const ArticleEditor = () => {
+const ArticleEditor: React.FC = () => {
   const { user } = useAuth();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const isEditing = !!slug && slug !== 'undefined' && slug.trim() !== '';
-  
+
+  const isEditing = !!slug;
+  const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [article, setArticle] = useState<Article | null>(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -41,7 +49,10 @@ const ArticleEditor = () => {
     readTime: "5 min read",
     featuredImage: "/placeholder.svg",
     status: "published",
+    author: "",
   });
+
+  const [authors, setAuthors] = useState<Author[]>([]);
 
   // Debug: Check what we're getting from the URL
   useEffect(() => {
@@ -93,6 +104,7 @@ const ArticleEditor = () => {
         readTime: fetchedArticle.readTime,
         featuredImage: fetchedArticle.featuredImage || "/placeholder.svg",
         status: "published",
+        author: typeof fetchedArticle.author === 'object' ? fetchedArticle.author._id : fetchedArticle.author || "",
       });
     } catch (error: any) {
       console.error('❌ Error fetching article:', error);
@@ -250,12 +262,30 @@ const ArticleEditor = () => {
     if (formData.content) {
       const wordCount = formData.content.split(/\s+/).length;
       const readTimeMinutes = Math.ceil(wordCount / 200); // 200 words per minute
-      setFormData(prev => ({ 
-        ...prev, 
-        readTime: `${readTimeMinutes} min read` 
+      setFormData(prev => ({
+        ...prev,
+        readTime: `${readTimeMinutes} min read`
       }));
     }
   }, [formData.content]);
+
+  // Fetch authors for preview
+  useEffect(() => {
+    const fetchAuthors = async () => {
+      try {
+        const result = await articleService.getAuthors();
+        if (result.success && result.data) {
+          setAuthors(result.data);
+        }
+      } catch (error) {
+        console.error('Error fetching authors:', error);
+      }
+    };
+
+    if (user?.role === 'admin') {
+      fetchAuthors();
+    }
+  }, [user]);
 
   // Show error if we have an invalid slug in edit mode
   if (isEditing && !slug) {
@@ -454,6 +484,11 @@ const ArticleEditor = () => {
                     </div>
                   </div>
 
+                  <AuthorSelect
+                    value={formData.author}
+                    onChange={(value) => handleChange("author", value)}
+                  />
+
                   <div className="space-y-2">
                     <Label htmlFor="slug">URL Slug *</Label>
                     <Input
@@ -553,9 +588,9 @@ const ArticleEditor = () => {
                     <div>
                       <h1 className="text-4xl font-bold mb-4">{formData.title || "Untitled Article"}</h1>
                       <p className="text-lg text-muted-foreground mb-4">{formData.excerpt}</p>
-                      
+
                       <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
-                        <span>By Admin</span>
+                        <span>By {authors.find(author => author._id === formData.author)?.username || 'Unknown Author'}</span>
                         <span>•</span>
                         <span>{formData.readTime}</span>
                         <span>•</span>

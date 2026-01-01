@@ -1,5 +1,7 @@
 import { Article } from "@/data/articles.types";
 
+const API_BASE_URL = import.meta.env.REACT_APP_API_BASE_URL;
+
 // API service for articles
 export const articleService = {
   transformArticle: (backendArticle: any): Article => {
@@ -384,6 +386,81 @@ export const articleService = {
     } catch (error: any) {
       console.error('Error updating article:', error);
       return { success: false, error: error.message || 'Failed to update article. Please try again.' };
+    }
+  },
+
+  // Get authors for article creation (Admin only)
+  getAuthors: async (): Promise<{ success: boolean; data?: any[]; error?: string }> => {
+    try {
+      console.log('👥 Fetching available authors');
+
+      const response = await fetch('/api/users/authors', {
+        credentials: 'include',
+      });
+
+      console.log('📡 Authors response status:', response.status);
+
+      const data = await response.json();
+      console.log('✅ Authors response:', data);
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.error || `Failed to fetch authors: ${response.statusText}`
+        };
+      }
+
+      return {
+        success: true,
+        data: data.data
+      };
+
+    } catch (error) {
+      console.error('Error fetching authors:', error);
+      return {
+        success: false,
+        error: 'Failed to fetch authors. Please try again.'
+      };
+    }
+  },
+
+  // Create new article
+  createArticle: async (articleData: any): Promise<{ success: boolean; data?: Article; error?: string }> => {
+    try {
+      console.log('📝 Creating new article:', articleData);
+
+      const response = await fetch('/api/articles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(articleData),
+      });
+
+      console.log('📡 Create article response status:', response.status);
+
+      const data = await response.json();
+      console.log('✅ Create article response:', data);
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.error || `Failed to create article: ${response.statusText}`
+        };
+      }
+
+      return {
+        success: true,
+        data: articleService.transformArticle(data.data)
+      };
+
+    } catch (error) {
+      console.error('Error creating article:', error);
+      return {
+        success: false,
+        error: 'Failed to create article. Please try again.'
+      };
     }
   },
 

@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import DashboardLayout from "./DashboardLayout";
+import AuthorSelect from "@/pages/Admin/AuthorSelect";
 import {
   Users,
   Plus,
@@ -29,6 +31,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { articleService } from "@/services/articleService";
 import { apiService } from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
 
 const API_URL = import.meta.env.REACT_APP_API_BASE_URL;
 
@@ -60,6 +63,7 @@ interface Article {
 
 export default function AuthorManagement() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [authors, setAuthors] = useState<Author[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,12 +79,15 @@ export default function AuthorManagement() {
   // Form states
   const [authorForm, setAuthorForm] = useState({
     bio: '',
-    avatar: ''
+    avatar: '',
+    role: 'author',
+    isActive: true
   });
   const [newAuthorData, setNewAuthorData] = useState({
     username: '',
     email: '',
     password: '',
+    bio: '',
     role: 'author'
   });
   const [newAuthorId, setNewAuthorId] = useState('');
@@ -93,6 +100,10 @@ export default function AuthorManagement() {
   const loadAuthors = async () => {
     try {
       setLoading(true);
+      console.log('Loading authors - Current user:', user);
+      console.log('User role:', user?.role);
+      console.log('Is authenticated:', !!user);
+
       // Use apiService instead of userService to ensure correct endpoint and credentials
       const response = await apiService.admin.getUsers();
       // Axios returns data in response.data
@@ -101,11 +112,13 @@ export default function AuthorManagement() {
         const users = Array.isArray(response.data.data) ? response.data.data : response.data.data?.users || [];
         setAuthors(users);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading authors:', error);
+      console.error('Error response:', error.response);
+      const isForbidden = error.response?.status === 403;
       toast({
-        title: "Error",
-        description: "Failed to load authors",
+        title: isForbidden ? "Access Denied" : "Error",
+        description: isForbidden ? "You do not have permission to view authors. Admin rights required." : "Failed to load authors",
         variant: "destructive",
       });
     } finally {
@@ -129,7 +142,21 @@ export default function AuthorManagement() {
 
     try {
       setUpdating(true);
-      const { data: response } = await apiService.admin.updateUser(selectedAuthor._id, authorForm);
+
+      // Check if role has changed
+      const roleChanged = selectedAuthor.role !== authorForm.role;
+
+      // If role changed, update role separately
+      if (roleChanged) {
+        const { data: roleResponse } = await apiService.admin.updateUserRole(selectedAuthor._id, authorForm.role);
+        if (!roleResponse.success) {
+          throw new Error(roleResponse.error || 'Failed to update role');
+        }
+      }
+
+      // Update other profile fields (excluding role since it's handled separately)
+      const { role, ...profileData } = authorForm;
+      const { data: response } = await apiService.admin.updateUser(selectedAuthor._id, profileData);
 
       if (response.success) {
         toast({
@@ -139,11 +166,11 @@ export default function AuthorManagement() {
         setShowAuthorDialog(false);
         loadAuthors();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating author profile:', error);
       toast({
         title: "Error",
-        description: "Failed to update author profile",
+        description: error.response?.data?.error || "Failed to update author profile",
         variant: "destructive",
       });
     } finally {
@@ -152,10 +179,10 @@ export default function AuthorManagement() {
   };
 
   const handleAddAuthor = async () => {
-    if (!newAuthorData.username || !newAuthorData.email || !newAuthorData.password) {
+    if (!newAuthorData.username || !newAuthorData.email || !newAuthorData.password || !newAuthorData.bio) {
       toast({
         title: "Validation Error",
-        description: "Please fill in all required fields",
+        description: "Please fill in all required fields including bio",
         variant: "destructive",
       });
       return;
@@ -168,7 +195,7 @@ export default function AuthorManagement() {
       if (response.success) {
         toast({ title: "Success", description: "Author created successfully" });
         setShowAddAuthorDialog(false);
-        setNewAuthorData({ username: '', email: '', password: '', role: 'author' });
+        setNewAuthorData({ username: '', email: '', password: '', bio: '', role: 'author' });
         loadAuthors();
       } else {
         toast({ title: "Error", description: response.error || "Failed to create author", variant: "destructive" });
@@ -214,7 +241,9 @@ export default function AuthorManagement() {
     setSelectedAuthor(author);
     setAuthorForm({
       bio: author.bio || '',
-      avatar: author.avatar || ''
+      avatar: author.avatar || '',
+      role: author.role,
+      isActive: author.isActive
     });
     setShowAuthorDialog(true);
   };
@@ -308,6 +337,26 @@ export default function AuthorManagement() {
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="h-32 bg-gray-200 rounded animate-pulse" />
             ))}
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Check if user is admin
+  if (!user || user.role !== 'admin') {
+    return (
+      <DashboardLayout>
+        <div className="p-8 space-y-6">
+          <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+            <AlertCircle className="h-16 w-16 text-red-500 mb-4" />
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Access Denied</h2>
+            <p className="text-slate-600 mb-4">
+              You do not have permission to access this page. Admin rights are required.
+            </p>
+            <p className="text-sm text-slate-500">
+              Current role: {user?.role || 'Not logged in'}
+            </p>
           </div>
         </div>
       </DashboardLayout>
@@ -531,6 +580,22 @@ export default function AuthorManagement() {
             </DialogHeader>
             <div className="space-y-4">
               <div>
+                <Label htmlFor="role">Role</Label>
+                <Select
+                  value={authorForm.role}
+                  onValueChange={(value) => setAuthorForm(prev => ({ ...prev, role: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="author">Author</SelectItem>
+                    <SelectItem value="editor">Editor</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
                 <Label htmlFor="bio">Bio</Label>
                 <Textarea
                   id="bio"
@@ -548,6 +613,14 @@ export default function AuthorManagement() {
                   onChange={(e) => setAuthorForm(prev => ({ ...prev, avatar: e.target.value }))}
                   placeholder="Enter avatar URL..."
                 />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="isActive"
+                  checked={authorForm.isActive}
+                  onCheckedChange={(checked) => setAuthorForm(prev => ({ ...prev, isActive: checked as boolean }))}
+                />
+                <Label htmlFor="isActive">Active</Label>
               </div>
             </div>
             <DialogFooter>
@@ -630,7 +703,7 @@ export default function AuthorManagement() {
                   type="email"
                   value={newAuthorData.email}
                   onChange={(e) => setNewAuthorData(prev => ({ ...prev, email: e.target.value }))}
-                  placeholder="john@example.com"
+                  placeholder="youremail@gmail.com"
                 />
               </div>
               <div>
@@ -641,6 +714,17 @@ export default function AuthorManagement() {
                   value={newAuthorData.password}
                   onChange={(e) => setNewAuthorData(prev => ({ ...prev, password: e.target.value }))}
                   placeholder="••••••••"
+                />
+              </div>
+              <div>
+                <Label htmlFor="new-bio">Bio *</Label>
+                <Textarea
+                  id="new-bio"
+                  value={newAuthorData.bio}
+                  onChange={(e) => setNewAuthorData(prev => ({ ...prev, bio: e.target.value }))}
+                  placeholder="Enter author bio..."
+                  rows={4}
+                  required
                 />
               </div>
               <div>

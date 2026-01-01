@@ -1,12 +1,13 @@
 export interface Article {
   id: string;
-  title: string;  
+  title: string;
   excerpt: string;
   content: string;
   slug: string;
   category: string;
   tags: string[];
-  author: {
+  author: string | {
+    _id: string;
     name: string;
     avatar?: string;
   };

@@ -12,7 +12,7 @@ import AdminDashboard from "./pages/Admin/Dashboard";
 import ArticleEditor from "./pages/Admin/Editor";
 import AdsDashboard from "./pages/Admin/AdsDashboard";
 import AdCampaignForm from "./pages/Admin/AdCampaignForm";
-import AdCampaignView from "./pages/Admin/AdCampaignView"; // ADD THIS IMPORT
+import AdCampaignView from "./pages/Admin/AdCampaignView"; 
 import AdsSettings from "./pages/Admin/AdsSettings";
 import Analytics from "./pages/Admin/Analytics";
 import AuthorManagement from "./pages/Admin/AuthorManagement";
@@ -22,6 +22,20 @@ import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/Auth/ProtectedRoute";
 import Login from "@/components/Auth/Login";
+
+// Secure login route guard
+const SecureLoginRoute = () => {
+  // Check for specific access token or query parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  const accessToken = urlParams.get('access');
+
+  // Only allow access if the correct access token is provided
+  if (accessToken !== 'secure-admin-portal-2024') {
+    return <NotFound />;
+  }
+
+  return <Login />;
+};
 
 const queryClient = new QueryClient();
 
@@ -41,7 +55,7 @@ const App = () => (
             <Route path="/category/:category" element={<Category />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<Login />} />
+            <Route path="/admin-access-secure-portal" element={<SecureLoginRoute />} />
             
             {/* Protected admin routes */}
             <Route 

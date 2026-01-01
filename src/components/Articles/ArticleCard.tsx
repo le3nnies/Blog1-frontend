@@ -75,13 +75,8 @@ export const ArticleCard = ({ article, variant = 'default', className = '', inde
   }
 
   // Event handlers
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleClick = () => {
     trackArticleClick(article, variant);
-    
-    setTimeout(() => {
-      window.location.href = `/article/${articleSlug}`;
-    }, 50);
   };
 
   const handleBookmark = (e: React.MouseEvent) => {

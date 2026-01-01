@@ -207,6 +207,15 @@ interface BackendAnalyticsData {
       title: string;
       description: string;
     };
+    hourlyTraffic: {
+      data: Array<{
+        hour: number;
+        views: number;
+        uniqueVisitors: number;
+      }>;
+      title: string;
+      description: string;
+    };
   };
 }
 
@@ -292,6 +301,9 @@ export default function AnalyticsDashboard() {
   const [exporting, setExporting] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [allTimeData, setAllTimeData] = useState<any>(null);
+  const [activeSessions, setActiveSessions] = useState<any[]>([]);
+  const [activeSessionsLoading, setActiveSessionsLoading] = useState(false);
+  const [sessionLimit, setSessionLimit] = useState('25');
 
   useEffect(() => {
     let isCancelled = false;
@@ -436,12 +448,20 @@ export default function AnalyticsDashboard() {
       } catch (error) {
         if (isCancelled) return;
 
-        console.error('Error fetching analytics:', error);
+        let errorMessage = error instanceof Error ? error.message : "Unable to fetch analytics data from server";
+
+        // Detect HTML response error (common when API is down or path is wrong)
+        if (errorMessage.includes("Unexpected token '<'") || errorMessage.includes("Unexpected token <")) {
+          console.error("API Error: The server returned HTML (likely a 404 page) instead of JSON. Check your API URL and backend status.");
+          errorMessage = "API Error: Received HTML instead of JSON. Check if backend is running.";
+        } else {
+          console.error('Error fetching analytics:', error);
+        }
 
         // Show error instead of falling back to mock data
         toast({
           title: "Failed to Load Analytics",
-          description: error instanceof Error ? error.message : "Unable to fetch analytics data from server",
+          description: errorMessage,
           variant: "destructive",
         });
 
@@ -461,6 +481,31 @@ export default function AnalyticsDashboard() {
       isCancelled = true;
     };
   }, [period, refreshTrigger, toast]);
+
+  const fetchActiveSessions = useCallback(async () => {
+    try {
+      setActiveSessionsLoading(true);
+      const data = await analyticsService.getActiveSessions(parseInt(sessionLimit));
+      setActiveSessions(data.activeSessions);
+    } catch (error) {
+      console.error("Failed to fetch active sessions", error);
+      toast({
+        title: "Error",
+        description: "Failed to load active sessions",
+        variant: "destructive",
+      });
+    } finally {
+      setActiveSessionsLoading(false);
+    }
+  }, [sessionLimit, toast]);
+
+  useEffect(() => {
+    if (activeTab === 'active-sessions') {
+      fetchActiveSessions();
+      const interval = setInterval(fetchActiveSessions, 30000); // Poll every 30s
+      return () => clearInterval(interval);
+    }
+  }, [activeTab, fetchActiveSessions]);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -596,7 +641,7 @@ export default function AnalyticsDashboard() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-4 w-full md:w-auto">
+          <TabsList className="grid grid-cols-5 w-full md:w-auto">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Overview
@@ -608,6 +653,10 @@ export default function AnalyticsDashboard() {
             <TabsTrigger value="content" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Content
+            </TabsTrigger>
+            <TabsTrigger value="active-sessions" className="flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              Active Sessions
             </TabsTrigger>
             <TabsTrigger value="realtime" className="flex items-center gap-2">
               <Zap className="h-4 w-4" />
@@ -781,7 +830,7 @@ export default function AnalyticsDashboard() {
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={data?.graphs.deviceTypes.data}
+                          data={data?.devices.types}
                           cx="50%"
                           cy="50%"
                           innerRadius={60}
@@ -789,7 +838,7 @@ export default function AnalyticsDashboard() {
                           paddingAngle={5}
                           dataKey="percentage"
                         >
-                          {data?.graphs.deviceTypes.data.map((entry, index) => (
+                          {data?.devices.types.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
@@ -798,18 +847,35 @@ export default function AnalyticsDashboard() {
                       </PieChart>
                     </ResponsiveContainer>
                     <div className="grid grid-cols-3 gap-2 mt-4">
-                      {data?.graphs.deviceTypes.data.map((device, index) => (
-                        <div key={`${device.device}-${index}`} className="text-center p-2 border rounded-lg">
-                          <div className="flex items-center justify-center mb-1">
-                            <Monitor className="h-6 w-6" />
+                      {data?.devices.types.map((device, index) => {
+                        const getDeviceIcon = (deviceType: string) => {
+                          const type = deviceType.toLowerCase();
+                          if (type.includes('mobile') || type.includes('phone')) {
+                            return <Smartphone className="h-6 w-6 text-blue-600" />;
+                          } else if (type.includes('tablet')) {
+                            return <Tablet className="h-6 w-6 text-green-600" />;
+                          } else {
+                            return <Monitor className="h-6 w-6 text-purple-600" />;
+                          }
+                        };
+
+                        const formatDeviceName = (deviceType: string) => {
+                          return deviceType.charAt(0).toUpperCase() + deviceType.slice(1).toLowerCase();
+                        };
+
+                        return (
+                          <div key={`${device.device}-${index}`} className="text-center p-2 border rounded-lg">
+                            <div className="flex items-center justify-center mb-1">
+                              {getDeviceIcon(device.device)}
+                            </div>
+                            <div className="font-medium">{formatDeviceName(device.device)}</div>
+                            <div className="text-2xl font-bold">{Math.round(device.percentage)}%</div>
+                            <div className="text-xs text-muted-foreground">
+                              {formatNumber(device.sessions)} sessions
+                            </div>
                           </div>
-                          <div className="font-medium">{device.device}</div>
-                          <div className="text-2xl font-bold">{device.percentage}%</div>
-                          <div className="text-xs text-muted-foreground">
-                            {device.sessions} sessions
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 </CardContent>
@@ -826,11 +892,11 @@ export default function AnalyticsDashboard() {
                 <CardContent>
                   <div className="h-[300px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={data?.graphs.engagementTrends.data}>
-                        <XAxis dataKey="date" stroke="#888888" fontSize={12} />
+                      <BarChart data={data?.graphs.hourlyTraffic.data}>
+                        <XAxis dataKey="hour" stroke="#888888" fontSize={12} />
                         <YAxis stroke="#888888" fontSize={12} />
                         <Tooltip />
-                        <Bar dataKey="likes" fill="#4F46E5" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="views" fill="#4F46E5" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -973,28 +1039,129 @@ export default function AnalyticsDashboard() {
                     <div>
                       <div className="flex justify-between mb-1">
                         <span className="text-sm font-medium">Pages per Session</span>
-                        <span className="text-sm font-bold">3.2</span>
+                        <span className="text-sm font-bold">{data?.overview.avgPagesPerSession?.toFixed(1) || 0}</span>
                       </div>
-                      <Progress value={65} className="h-2" />
+                      <Progress value={Math.min((data?.overview.avgPagesPerSession || 0) * 10, 100)} className="h-2" />
                     </div>
                     <div>
                       <div className="flex justify-between mb-1">
                         <span className="text-sm font-medium">Avg. Session Duration</span>
-                        <span className="text-sm font-bold">2m 48s</span>
+                        <span className="text-sm font-bold">{formatDuration(data?.overview.avgSessionDuration || 0)}</span>
                       </div>
-                      <Progress value={56} className="h-2" />
+                      <Progress value={Math.min((data?.overview.avgSessionDuration || 0) * 10, 100)} className="h-2" />
                     </div>
                     <div>
                       <div className="flex justify-between mb-1">
                         <span className="text-sm font-medium">New vs Returning</span>
-                        <span className="text-sm font-bold">68% / 32%</span>
+                        <span className="text-sm font-bold">
+                          {Math.round((data?.overview.newVisitors || 0) / ((data?.overview.newVisitors || 0) + (data?.overview.returningVisitors || 0) || 1) * 100)}% / {Math.round((data?.overview.returningVisitors || 0) / ((data?.overview.newVisitors || 0) + (data?.overview.returningVisitors || 0) || 1) * 100)}%
+                        </span>
                       </div>
-                      <Progress value={68} className="h-2" />
+                      <Progress value={Math.round((data?.overview.newVisitors || 0) / ((data?.overview.newVisitors || 0) + (data?.overview.returningVisitors || 0) || 1) * 100)} className="h-2" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="active-sessions" className="space-y-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h2 className="text-xl font-bold tracking-tight">Active Sessions</h2>
+                <p className="text-sm text-muted-foreground">Real-time monitoring of current users</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Select value={sessionLimit} onValueChange={setSessionLimit}>
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue placeholder="Limit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="25">25 sessions</SelectItem>
+                    <SelectItem value="50">50 sessions</SelectItem>
+                    <SelectItem value="100">100 sessions</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button variant="outline" size="icon" onClick={fetchActiveSessions} disabled={activeSessionsLoading}>
+                  <RefreshCcw className={`h-4 w-4 ${activeSessionsLoading ? 'animate-spin' : ''}`} />
+                </Button>
+              </div>
+            </div>
+
+            <Card>
+              <CardContent className="p-0">
+                {activeSessionsLoading && activeSessions.length === 0 ? (
+                  <div className="p-6 space-y-4">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div key={i} className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <Skeleton className="h-10 w-10 rounded-full" />
+                          <div className="space-y-2">
+                            <Skeleton className="h-4 w-32" />
+                            <Skeleton className="h-3 w-24" />
+                          </div>
+                        </div>
+                        <Skeleton className="h-4 w-24" />
+                      </div>
+                    ))}
+                  </div>
+                ) : activeSessions.length === 0 ? (
+                  <div className="p-12 text-center text-muted-foreground">
+                    <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                    <p>No active sessions found at the moment.</p>
+                  </div>
+                ) : (
+                  <div className="divide-y">
+                    {activeSessions.map((session) => (
+                      <div key={session.sessionId} className="p-4 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between hover:bg-slate-50 transition-colors">
+                        <div className="flex items-center gap-3 min-w-[200px]">
+                          <div className="h-10 w-10 rounded-full bg-slate-100 overflow-hidden flex items-center justify-center border">
+                            {session.user?.avatar ? (
+                              <img src={session.user.avatar} alt={session.user.username} className="h-full w-full object-cover" />
+                            ) : (
+                              <Users className="h-5 w-5 text-slate-400" />
+                            )}
+                          </div>
+                          <div>
+                            <div className="font-medium text-sm">{session.user?.username || 'Guest User'}</div>
+                            <div className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Globe className="h-3 w-3" />
+                              {session.location?.city || 'Unknown'}, {session.location?.country || 'Unknown'}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm text-slate-600 min-w-[150px]">
+                          {session.device?.type === 'mobile' ? <Smartphone className="h-4 w-4" /> : 
+                           session.device?.type === 'tablet' ? <Tablet className="h-4 w-4" /> : 
+                           <Monitor className="h-4 w-4" />}
+                          <span className="capitalize">{session.device?.os || 'Unknown OS'} • {session.device?.browser || 'Browser'}</span>
+                        </div>
+
+                        <div className="flex-1 min-w-[200px]">
+                          <div className="text-sm font-medium truncate max-w-[300px] text-primary">
+                            {session.currentPage?.title || 'Viewing Page'}
+                          </div>
+                          <div className="text-xs text-muted-foreground truncate max-w-[300px]">
+                            {session.currentPage?.url || '/'}
+                          </div>
+                        </div>
+
+                        <div className="text-right text-sm min-w-[100px]">
+                          <div className="font-medium flex items-center justify-end gap-1 text-green-600">
+                            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                            Active
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {Math.round((session.session?.duration || 0) / 60)}m duration
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
 

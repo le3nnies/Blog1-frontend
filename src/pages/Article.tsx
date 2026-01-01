@@ -487,9 +487,14 @@ const shouldResetViewCount = (articleId) => {
                 )}
                 <div>
                   <h3 className="text-xl font-bold mb-2">About the Author</h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground font-medium mb-2">
                     {article.author?.name || 'Unknown Author'}
                   </p>
+                  {article.author?.bio && (
+                    <p className="text-muted-foreground leading-relaxed">
+                      {article.author.bio}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

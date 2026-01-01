@@ -31,6 +31,7 @@ export interface Article {
   author: {
     name: string;
     avatar?: string;
+    bio?: string;
   };
   publishedAt: string;
   createdAt: string;

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Link } from "react-router-dom";
 import { Plus, Edit, Trash2, Eye, TrendingUp, RefreshCw, DollarSign, Users } from "lucide-react";
@@ -32,7 +33,8 @@ import { useToast } from "@/hooks/use-toast";
 import { calculateArticleStats } from "@/utils/analytics.utils";
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -240,12 +242,12 @@ const AdminDashboard = () => {
     <Layout>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
             <p className="text-muted-foreground">Manage your blog articles and advertising</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 mt-4 md:mt-0">
             <Button
               variant="outline"
               size="lg"

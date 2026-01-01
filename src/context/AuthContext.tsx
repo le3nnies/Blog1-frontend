@@ -61,8 +61,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(response.data.data);
           setIsAuthenticated(true);
         }
-      } catch (error) {
-        console.error('Auth check failed:', error);
+      } catch (error: any) {
+        // 401 is expected when user is not authenticated - don't log as error
+        if (error.response?.status === 401) {
+          console.log('User not authenticated');
+        } else {
+          console.error('Auth check failed:', error);
+        }
         if (isMounted) {
           setUser(null);
           setIsAuthenticated(false);

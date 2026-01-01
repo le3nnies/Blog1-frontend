@@ -1,11 +1,9 @@
 // src/services/api.ts
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.REACT_APP_API_BASE_URL;
-
-// Create axios instance
+// Use empty baseURL to let Vite proxy handle /api routes
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: '',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -28,10 +26,8 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expired or invalid - redirect to login
-      window.location.href = '/login';
-    }
+    // Instead of redirecting on 401, reject the promise
+    // The component can catch this and handle logout via AuthContext
     return Promise.reject(error);
   }
 );
@@ -43,7 +39,7 @@ export const apiService = {
     login: (credentials) => api.post('/api/auth/login', credentials),
     register: (userData) => api.post('/api/auth/register', userData),
     logout: () => api.post('/api/auth/logout'),
-   // getProfile: () => api.get('/api/auth/me'),
+    getProfile: () => api.get('/api/auth/me'),
     updateProfile: (data) => api.put('/api/auth/profile', data),
     changePassword: (data) => api.put('/api/auth/change-password', data),
   },

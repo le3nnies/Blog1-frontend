@@ -1,10 +1,9 @@
 // lib/api.ts
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
-
+// Use empty baseURL to let Vite proxy handle /api routes
 export const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: '',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -34,24 +33,24 @@ api.interceptors.response.use(
     // Handle 401 errors
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      
+
       try {
         // Attempt to refresh token
         const refreshToken = localStorage.getItem('refresh_token');
         if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+          const response = await axios.post('/api/auth/refresh', {
             refreshToken,
           });
-          
+
           const { token } = response.data;
           localStorage.setItem('token', token);
-          
+
           originalRequest.headers.Authorization = `Bearer ${token}`;
           return api(originalRequest);
         }
       } catch (refreshError) {
-        // Redirect to login if refresh fails
-        window.location.href = '/login';
+        // Instead of redirecting, reject the promise
+        // The component can catch this and handle logout via AuthContext
         return Promise.reject(refreshError);
       }
     }
