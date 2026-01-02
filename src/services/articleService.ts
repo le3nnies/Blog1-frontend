@@ -1,6 +1,6 @@
 import { Article } from "@/data/articles.types";
 
-const API_BASE_URL = import.meta.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // API service for articles
 export const articleService = {
@@ -43,7 +43,7 @@ export const articleService = {
       const queryString = new URLSearchParams(params).toString();
       console.log('🔄 Fetching all articles:', `/api/articles?${queryString}`);
 
-      const response = await fetch(`/api/articles?${queryString}`, {
+      const response = await fetch(`${API_BASE_URL}/api/articles?${queryString}`, {
         credentials: 'include',
       });
       
@@ -83,7 +83,7 @@ export const articleService = {
     try {
       console.log('🔄 Fetching trending articles:', `/api/articles/trending?limit=${limit}`);
 
-      const response = await fetch(`/api/articles/trending?limit=${limit}`, {
+      const response = await fetch(`${API_BASE_URL}/api/articles/trending?limit=${limit}`, {
         credentials: 'include',
       });
       
@@ -118,7 +118,7 @@ export const articleService = {
       console.log('🔍 Fetching article with slug:', slug);
 
       // Use the correct slug route - note the /slug/ part
-      const response = await fetch(`/api/articles/slug/${slug}`, {
+      const response = await fetch(`${API_BASE_URL}/api/articles/slug/${slug}`, {
         credentials: 'include',
       });
 
@@ -157,7 +157,7 @@ export const articleService = {
     try {
       console.log('🔄 Fetching articles by category:', category);
       
-      const response = await fetch(`/api/articles/category/${encodeURIComponent(category)}`, {
+      const response = await fetch(`${API_BASE_URL}/api/articles/category/${encodeURIComponent(category)}`, {
         credentials: 'include',
       });
       
@@ -188,7 +188,7 @@ export const articleService = {
   getRelatedArticles: async (slug: string, limit = 3): Promise<Article[]> => {
     try {
       console.log('🔄 Fetching related articles for slug:', slug);
-      const response = await fetch(`/api/articles/${slug}/related?limit=${limit}`, {
+      const response = await fetch(`${API_BASE_URL}/api/articles/${slug}/related?limit=${limit}`, {
         credentials: 'include',
       });
       
@@ -213,7 +213,7 @@ export const articleService = {
     try {
       console.log('🔄 Incrementing view count for:', articleId);
       
-      const response = await fetch(`/api/articles/${articleId}/view`, {
+      const response = await fetch(`${API_BASE_URL}/api/articles/${articleId}/view`, {
         method: 'POST',
         credentials: 'include',
       });
@@ -234,7 +234,7 @@ export const articleService = {
     try {
       console.log('🔍 Searching articles:', query);
       
-      const response = await fetch(`/api/articles?search=${encodeURIComponent(query)}`, {
+      const response = await fetch(`${API_BASE_URL}/api/articles?search=${encodeURIComponent(query)}`, {
         credentials: 'include',
       });
       
@@ -267,7 +267,7 @@ export const articleService = {
     try {
       console.log('❤️ Liking article:', articleId);
 
-      const response = await fetch(`/api/articles/${articleId}/like`, {
+      const response = await fetch(`${API_BASE_URL}/api/articles/${articleId}/like`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -300,7 +300,7 @@ export const articleService = {
     try {
       console.log('💬 Adding comment to article:', articleId);
 
-      const response = await fetch(`/api/articles/${articleId}/comment`, {
+      const response = await fetch(`${API_BASE_URL}/api/articles/${articleId}/comment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -340,7 +340,7 @@ export const articleService = {
     try {
       console.log('🗑️ Deleting article:', articleId);
 
-      const response = await fetch(`/api/articles/${articleId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/articles/${articleId}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -370,7 +370,7 @@ export const articleService = {
     try {
       console.log('🔄 Updating article:', articleId, 'with:', updateData);
 
-      const response = await fetch(`/api/articles/${articleId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/articles/${articleId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -394,7 +394,7 @@ export const articleService = {
     try {
       console.log('👥 Fetching available authors');
 
-      const response = await fetch('/api/users/authors', {
+      const response = await fetch('${API_BASE_URL}/api/users/authors', {
         credentials: 'include',
       });
 
@@ -429,7 +429,7 @@ export const articleService = {
     try {
       console.log('📝 Creating new article:', articleData);
 
-      const response = await fetch('/api/articles', {
+      const response = await fetch('${API_BASE_URL}/api/articles', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -469,7 +469,7 @@ export const articleService = {
     try {
       console.log('👤 Changing article author:', articleId, 'to:', newAuthorId);
 
-      const response = await fetch(`/api/articles/${articleId}/author`, {
+      const response = await fetch(`${API_BASE_URL}/api/articles/${articleId}/author`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
