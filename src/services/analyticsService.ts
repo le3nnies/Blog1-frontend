@@ -1,6 +1,8 @@
 // Analytics service using relative URLs (proxied by Vite)
 import { AnalyticsData, AnalyticsFilters, RealtimeMetrics, InsightsAndRecommendations, CommentsAnalytics, BackendAnalyticsData } from '@/types/analytics.types';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 // Helper function to get request options with cookie-based authentication
 const getRequestOptions = (method: string = 'GET', body?: any) => {
   const options: RequestInit = {
