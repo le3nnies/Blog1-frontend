@@ -74,8 +74,8 @@ export const apiService = {
     updateArticleStatus: (id, status) => api.put(`/api/admin/articles/${id}/status`, { status }),
 
     // Analytics
-    getDashboardStats: () => api.get('${API_URL}/api/admin/dashboard/stats'),
-    getRevenueAnalytics: () => api.get('${API_URL}/api/admin/ads/revenue'),
+    getDashboardStats: () => api.get('/api/admin/dashboard/stats'),
+    getRevenueAnalytics: () => api.get('/api/admin/ads/revenue'),
 
     // System
     getSystemHealth: () => api.get('/api/admin/system/health'),
