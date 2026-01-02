@@ -10,7 +10,7 @@ const getRequestOptions = (method: string = 'GET', body?: any) => {
     headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true,
+    credentials: 'include',
   };
 
   if (body) {
