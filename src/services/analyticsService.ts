@@ -30,7 +30,7 @@ const getAnalytics = async (filters: AnalyticsFilters): Promise<BackendAnalytics
     compare: String(filters.compareWithPrevious || false),
   });
 
-  const response = await fetch(`${API_BASE_URL}/api/analytics?${queryParams.toString()}`, getRequestOptions());
+  const response = await fetch(`/api/analytics?${queryParams.toString()}`, getRequestOptions());
 
   if (!response.ok) {
     const errorData = await response.json();
