@@ -7,8 +7,10 @@ const API_URL = import.meta.env.VITE_API_BASE_URL;
 const getRequestOptions = (method: string = 'GET', body?: any) => {
   const options: RequestInit = {
     method,
-    credentials: 'include', // Include cookies for authentication
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true,
   };
 
   if (body) {
