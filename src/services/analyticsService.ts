@@ -8,11 +8,12 @@ const getRequestOptions = (method: string = 'GET', body?: any) => {
     'Content-Type': 'application/json',
   };
 
-  const options: RequestInit = {
-    method,
-    credentials: 'include', // Include cookies for authentication
-    headers,
-  };
+  const getRequestOptions = (method: string = 'GET', body?: any) => {  
+  const options: RequestInit = {  
+    method,  
+    credentials: 'include', // Include cookies for authentication  
+    headers: { 'Content-Type': 'application/json' },  
+  };  
 
   if (body) {
     options.body = JSON.stringify(body);
