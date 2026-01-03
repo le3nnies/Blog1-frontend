@@ -20,26 +20,29 @@ const getRequestOptions = (method: string = 'GET', body?: any) => {
   return options;
 };
 
-const getAnalytics = async (filters: AnalyticsFilters): Promise<BackendAnalyticsData> => {
-  // Construct query parameters from the filters object
-  const queryParams = new URLSearchParams({
-    period: filters.period,
-    startDate: filters.startDate,
-    endDate: filters.endDate,
-    compare: String(filters.compareWithPrevious || false),
-  });
-
-  const response = await fetch(`${API_URL}/api/analytics?${queryParams.toString()}`, getRequestOptions());
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || 'Failed to fetch analytics data');
-  }
-
-  const result = await response.json();
-  return result.data; // Extract the data from the response wrapper
+const getAnalytics = async (filters: AnalyticsFilters): Promise<BackendAnalyticsData> => {  
+  const queryParams = new URLSearchParams({  
+    period: filters.period,  
+    startDate: filters.startDate,  
+    endDate: filters.endDate,  
+    compare: String(filters.compareWithPrevious || false),  
+  });  
+  
+  console.log('Making analytics request with cookies');  
+  const response = await fetch(`${API_URL}/api/analytics?${queryParams.toString()}`, getRequestOptions());  
+    
+  // Log response headers to see what backend says  
+  console.log('Analytics response status:', response.status);  
+  console.log('Response headers:', Object.fromEntries(response.headers.entries()));  
+    
+  if (!response.ok) {  
+    const errorData = await response.json();  
+    throw new Error(errorData.message || 'Failed to fetch analytics data');  
+  }  
+  
+  const result = await response.json();  
+  return result.data;  
 };
-
 const getRealtimeMetrics = async (): Promise<RealtimeMetrics> => {
   const response = await fetch(`${API_URL}/api/analytics/realtime`, getRequestOptions());
 
