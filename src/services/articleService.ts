@@ -395,7 +395,7 @@ export const articleService = {
     try {
       console.log('👥 Fetching available authors');
 
-      const response = await fetch('/api/users/authors', {
+      const response = await fetch('${API_BASE_URL}/api/users/authors', {
         credentials: 'include',
       });
 
