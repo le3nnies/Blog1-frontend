@@ -1,6 +1,6 @@
 import { Article } from "@/data/articles.types";
 
-const API_BASE_URL = import.meta.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // API service for articles
 export const articleService = {
@@ -16,10 +16,11 @@ export const articleService = {
       content: backendArticle.content,
       category: backendArticle.category,
       tags: backendArticle.tags || [], // Added tags
-      author: {
-        name: backendArticle.author?.username || 'Unknown Author',
-        avatar: backendArticle.author?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${backendArticle.author?.username || 'user'}`
-      },
+      author: backendArticle.author ? {
+        _id: backendArticle.author._id || backendArticle.author.id,
+        name: backendArticle.author.username || backendArticle.author.name || 'Unknown Author',
+        avatar: backendArticle.author.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${backendArticle.author.username || backendArticle.author.name || 'user'}`
+      } : 'Unknown Author',
       views: backendArticle.views || 0,
       likesCount: backendArticle.likesCount || backendArticle.likes || 0,
       likes: backendArticle.likes || [], // Added likes
@@ -394,7 +395,7 @@ export const articleService = {
     try {
       console.log('👥 Fetching available authors');
 
-      const response = await fetch('/api/users/authors', {
+      const response = await fetch(`/api/users/authors`, {
         credentials: 'include',
       });
 

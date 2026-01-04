@@ -20,6 +20,16 @@ const getRequestOptions = (method: string = 'GET', body?: any) => {
   return options;
 };
 
+// Helper function to get the correct API base URL
+const getApiBaseUrl = () => {
+  // In development, use relative URLs (proxied by Vite)
+  if (process.env.NODE_ENV === 'development') {
+    return '';
+  }
+  // In production, use the full backend URL
+  return process.env.VITE_BACKEND_URL || 'https://blog1-backend.onrender.com';
+};
+
 const getAnalytics = async (filters: AnalyticsFilters): Promise<BackendAnalyticsData> => {
   // Construct query parameters from the filters object
   const queryParams = new URLSearchParams({

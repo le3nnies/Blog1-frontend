@@ -1,9 +1,9 @@
 // src/services/api.ts
 import axios from 'axios';
 
-// Use empty baseURL to let Vite proxy handle /api routes
+// Use VITE_API_BASE_URL for production, empty for development (Vite proxy)
 const api = axios.create({
-  baseURL: '',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
