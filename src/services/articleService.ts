@@ -16,7 +16,7 @@ export const articleService = {
       content: backendArticle.content,
       category: backendArticle.category,
       tags: backendArticle.tags || [], // Added tags
-      author: backendArticle.author ? {
+       author: backendArticle.author ? {
         _id: backendArticle.author._id || backendArticle.author.id,
         name: backendArticle.author.username || backendArticle.author.name || 'Unknown Author',
         avatar: backendArticle.author.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${backendArticle.author.username || backendArticle.author.name || 'user'}`
