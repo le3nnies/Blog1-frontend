@@ -116,14 +116,7 @@ const getDashboardAnalytics = async (period: string) => {
   const response = await fetch(`/api/analytics/dashboard?period=${period}`, getRequestOptions());  
   
   if (!response.ok) {  
-    let errorMessage = 'Failed to fetch dashboard analytics data';  
-    try {  
-      const errorData = await response.json();  
-      errorMessage = errorData.message || errorMessage;  
-    } catch (e) {  
-      // Ignore JSON parse errors  
-    }  
-    throw new Error(`${errorMessage} (${response.status})`);  
+    await handleErrorResponse(response, 'Failed to fetch dashboard analytics data');  
   }  
   
   const result = await response.json();  
