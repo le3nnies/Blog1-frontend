@@ -1,6 +1,8 @@
 // Analytics service using relative URLs (proxied by Vite)
 import { AnalyticsData, AnalyticsFilters, RealtimeMetrics, InsightsAndRecommendations, CommentsAnalytics, BackendAnalyticsData } from '@/types/analytics.types';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 // Helper function to get request options with cookie-based authentication
 const getRequestOptions = (method: string = 'GET', body?: any) => {
   const headers: Record<string, string> = {
@@ -18,16 +20,6 @@ const getRequestOptions = (method: string = 'GET', body?: any) => {
   }
 
   return options;
-};
-
-// Helper function to get the correct API base URL
-const getApiBaseUrl = () => {
-  // In development, use relative URLs (proxied by Vite)
-  if (process.env.NODE_ENV === 'development') {
-    return '';
-  }
-  // In production, use the full backend URL
-  return process.env.REACT_APP_BACKEND_URL || 'https://blog1-backend.onrender.com';
 };
 
 const getAnalytics = async (filters: AnalyticsFilters): Promise<BackendAnalyticsData> => {
