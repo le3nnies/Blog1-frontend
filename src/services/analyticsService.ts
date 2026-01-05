@@ -31,7 +31,7 @@ const getAnalytics = async (filters: AnalyticsFilters): Promise<BackendAnalytics
     compare: String(filters.compareWithPrevious || false),
   });
 
-  const response = await fetch(`${getApiBaseUrl()}/api/analytics?${queryParams.toString()}`, getRequestOptions());
+  const response = await fetch(`${API_BASE_URL}/api/analytics?${queryParams.toString()}`, getRequestOptions());
 
   if (!response.ok) {
     const errorData = await response.json();
@@ -43,7 +43,7 @@ const getAnalytics = async (filters: AnalyticsFilters): Promise<BackendAnalytics
 };
 
 const getRealtimeMetrics = async (): Promise<RealtimeMetrics> => {
-  const response = await fetch(`/api/analytics/realtime`, getRequestOptions());
+  const response = await fetch(`${API_BASE_URL}/api/analytics/realtime`, getRequestOptions());
 
   if (!response.ok) {
     const errorData = await response.json();
@@ -63,7 +63,7 @@ const generateReport = async (filters: AnalyticsFilters, format: 'csv' | 'pdf' |
   });
 
   const queryParams = new URLSearchParams(params);
-  const response = await fetch(`/api/analytics/report?${queryParams.toString()}`, getRequestOptions());
+  const response = await fetch(`${API_BASE_URL}/api/analytics/report?${queryParams.toString()}`, getRequestOptions());
 
   if (!response.ok) {
     throw new Error('Failed to generate report');
@@ -72,7 +72,7 @@ const generateReport = async (filters: AnalyticsFilters, format: 'csv' | 'pdf' |
 };
 
 const getSubscriberCount = async (): Promise<number> => {
-  const response = await fetch(`/api/newsletter/subscriber-count`, getRequestOptions());
+  const response = await fetch(`${API_BASE_URL}/api/newsletter/subscriber-count`, getRequestOptions());
 
   if (!response.ok) {
     const errorData = await response.json();
@@ -91,7 +91,7 @@ const getCommentsAnalytics = async (filters: AnalyticsFilters): Promise<Comments
     endDate: filters.endDate,
   });
 
-  const response = await fetch(`/api/analytics/comments?${queryParams.toString()}`, getRequestOptions());
+  const response = await fetch(`${API_BASE_URL}/api/analytics/comments?${queryParams.toString()}`, getRequestOptions());
 
   if (!response.ok) {
     const errorData = await response.json();
@@ -121,7 +121,7 @@ const getDashboardAnalytics = async (period: string) => {
 };
 
 const getActiveSessions = async (limit: number = 50) => {
-  const response = await fetch(`/api/analytics/active-sessions?limit=${limit}`, getRequestOptions());
+  const response = await fetch(`${API_BASE_URL}/api/analytics/active-sessions?limit=${limit}`, getRequestOptions());
 
   if (!response.ok) {
     const errorData = await response.json();
