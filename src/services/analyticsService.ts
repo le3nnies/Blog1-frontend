@@ -27,7 +27,7 @@ const getApiBaseUrl = () => {
     return '';
   }
   // In production, use the full backend URL
-  return process.env.VITE_BACKEND_URL || 'https://blog1-backend.onrender.com';
+  return process.env.REACT_APP_BACKEND_URL || 'https://blog1-backend.onrender.com';
 };
 
 const getAnalytics = async (filters: AnalyticsFilters): Promise<BackendAnalyticsData> => {
