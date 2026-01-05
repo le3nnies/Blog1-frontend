@@ -1,5 +1,6 @@
 // Analytics service using relative URLs (proxied by Vite)  
 import { AnalyticsData, AnalyticsFilters, RealtimeMetrics, InsightsAndRecommendations, CommentsAnalytics, BackendAnalyticsData } from '@/types/analytics.types';  
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;  
   
 // Helper function to get request options with cookie-based authentication  
 const getRequestOptions = (method: string = 'GET', body?: any) => {  
@@ -46,7 +47,7 @@ const getAnalytics = async (filters: AnalyticsFilters): Promise<BackendAnalytics
     compare: String(filters.compareWithPrevious || false),  
   });  
   
-  const response = await fetch(`/api/analytics?${queryParams.toString()}`, getRequestOptions());  
+  const response = await fetch(`${API_BASE_URL}/api/analytics?${queryParams.toString()}`, getRequestOptions());  
   
   if (!response.ok) {  
     await handleErrorResponse(response, 'Failed to fetch analytics data');  
@@ -57,7 +58,7 @@ const getAnalytics = async (filters: AnalyticsFilters): Promise<BackendAnalytics
 };  
   
 const getRealtimeMetrics = async (): Promise<RealtimeMetrics> => {  
-  const response = await fetch(`/api/analytics/realtime`, getRequestOptions());  
+  const response = await fetch(`${API_BASE_URL}/api/analytics/realtime`, getRequestOptions());  
   
   if (!response.ok) {  
     await handleErrorResponse(response, 'Failed to fetch real-time metrics');  
@@ -76,7 +77,7 @@ const generateReport = async (filters: AnalyticsFilters, format: 'csv' | 'pdf' |
   });  
   
   const queryParams = new URLSearchParams(params);  
-  const response = await fetch(`/api/analytics/report?${queryParams.toString()}`, getRequestOptions());  
+  const response = await fetch(`${API_BASE_URL}/api/analytics/report?${queryParams.toString()}`, getRequestOptions());  
   
   if (!response.ok) {  
     throw new Error('Failed to generate report');  
@@ -85,7 +86,7 @@ const generateReport = async (filters: AnalyticsFilters, format: 'csv' | 'pdf' |
 };  
   
 const getSubscriberCount = async (): Promise<number> => {  
-  const response = await fetch(`/api/newsletter/subscriber-count`, getRequestOptions());  
+  const response = await fetch(`${API_BASE_URL}/api/newsletter/subscriber-count`, getRequestOptions());  
   
   if (!response.ok) {  
     await handleErrorResponse(response, 'Failed to fetch subscriber count');  
@@ -102,7 +103,7 @@ const getCommentsAnalytics = async (filters: AnalyticsFilters): Promise<Comments
     endDate: filters.endDate,  
   });  
   
-  const response = await fetch(`/api/analytics/comments?${queryParams.toString()}`, getRequestOptions());  
+  const response = await fetch(`${API_BASE_URL}/api/analytics/comments?${queryParams.toString()}`, getRequestOptions());  
   
   if (!response.ok) {  
     await handleErrorResponse(response, 'Failed to fetch comments analytics data');  
@@ -113,7 +114,7 @@ const getCommentsAnalytics = async (filters: AnalyticsFilters): Promise<Comments
 };  
   
 const getDashboardAnalytics = async (period: string) => {  
-  const response = await fetch(`/api/analytics/dashboard?period=${period}`, getRequestOptions());  
+  const response = await fetch(`${API_BASE_URL}/api/analytics/dashboard?period=${period}`, getRequestOptions());  
   
   if (!response.ok) {  
     await handleErrorResponse(response, 'Failed to fetch dashboard analytics data');  
@@ -124,7 +125,7 @@ const getDashboardAnalytics = async (period: string) => {
 };  
   
 const getActiveSessions = async (limit: number = 50) => {  
-  const response = await fetch(`/api/analytics/active-sessions?limit=${limit}`, getRequestOptions());  
+  const response = await fetch(`${API_BASE_URL}/api/analytics/active-sessions?limit=${limit}`, getRequestOptions());  
   
   if (!response.ok) {  
     await handleErrorResponse(response, 'Failed to fetch active sessions');  
