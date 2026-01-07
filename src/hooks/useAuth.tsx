@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';  
 import { useNavigate } from 'react-router-dom';  
 import { apiService } from '../services/api';  
+const API_URL = import.meta.env.REACT_APP_API_BASE_URL;
   
 interface User {  
   id: string;  
