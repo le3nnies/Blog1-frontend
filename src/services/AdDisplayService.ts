@@ -3,7 +3,7 @@ import { AdCampaign } from '@/types/ads.types';
 const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 class AdDisplayService {
-  private baseURL = BACKEND_URL;
+  private baseURL = `${BACKEND_URL}/api`;
 
   async getActiveAds(category?: string, position?: string, limit: number = 4): Promise<AdCampaign[]> {
     const params = new URLSearchParams();
