@@ -1,6 +1,6 @@
 // src/services/adsService.ts
 import { AdCampaign, AdCreative, GoogleAdConfig, AdStats, AdSettings } from '@/types/ads.types';
-const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
+const BACKEND_URL = import.meta.env.REACT_APP_API_BASE_URL;
 
 class AdsService {
   private baseURL = `${BACKEND_URL}/api`;
