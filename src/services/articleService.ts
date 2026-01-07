@@ -214,7 +214,7 @@ export const articleService = {
     try {
       console.log('🔄 Incrementing view count for:', articleId);
       
-      const response = await fetch(`/api/articles/${articleId}/view`, {
+      const response = await fetch(`${API_BASE_URL}/api/articles/${articleId}/view`, {
         method: 'POST',
         credentials: 'include',
       });
