@@ -3,7 +3,7 @@ import { AdCampaign, AdCreative, GoogleAdConfig, AdStats, AdSettings } from '@/t
 const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 class AdsService {
-  private baseURL = 'VITE_API_BASE_URL';
+  private baseURL = BACKEND_URL;
 
   // Helper to get request options with cookie-based authentication
   private getRequestOptions(method: string = 'GET', body?: any, isFormData: boolean = false): RequestInit {
