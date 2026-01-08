@@ -1,6 +1,6 @@
 // src/services/adDisplayService.ts
 import { AdCampaign } from '@/types/ads.types';
-const BACKEND_URL = import.meta.env.REACT_APP_API_BASE_URL;
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 class AdDisplayService {
   private baseURL = `${BACKEND_URL}/api`;
