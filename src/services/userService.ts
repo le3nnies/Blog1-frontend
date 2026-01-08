@@ -19,7 +19,7 @@ const getRequestOptions = (method: string = 'GET', body?: any): RequestInit => {
 
 export const updateAuthorProfile = async (userId: string, data: { bio?: string; avatar?: string }) => {
   try {
-    const response = await fetch(`${API_URL}/users/${userId}`, {
+    const response = await fetch(`${API_URL}/api/users/${userId}`, {
       ...getRequestOptions('PUT', data),
     });
 
@@ -34,7 +34,7 @@ export const updateAuthorProfile = async (userId: string, data: { bio?: string; 
 // Additional helper that might be useful
 export const getUserProfile = async (userId: string) => {
   try {
-    const response = await fetch(`${API_URL}/users/${userId}`, {
+    const response = await fetch(`${API_URL}/api/users/${userId}`, {
       ...getRequestOptions(),
     });
     return await response.json();
@@ -46,7 +46,7 @@ export const getUserProfile = async (userId: string) => {
 
 export const getAllAuthors = async () => {
   try {
-    const response = await fetch(`${API_URL}/users`, {
+    const response = await fetch(`${API_URL}/api/users`, {
       ...getRequestOptions(),
     });
     const result = await response.json();
@@ -70,7 +70,7 @@ export const getAllAuthors = async () => {
 export const createAuthor = async (userData: { username: string; email: string; password?: string; role?: string }) => {
   try {
     // Use admin register endpoint for creating authors
-    const response = await fetch(`${API_URL}/auth/admin/register`, {
+    const response = await fetch(`${API_URL}/api/auth/admin/register`, {
       ...getRequestOptions('POST', userData),
     });
     return await response.json();
@@ -82,7 +82,7 @@ export const createAuthor = async (userData: { username: string; email: string; 
 
 export const deleteAuthor = async (userId: string) => {
   try {
-    const response = await fetch(`${API_URL}/users/${userId}`, {
+    const response = await fetch(`${API_URL}/api/users/${userId}`, {
       ...getRequestOptions('DELETE'),
     });
 
