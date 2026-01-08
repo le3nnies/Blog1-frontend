@@ -19,7 +19,7 @@ const getRequestOptions = (method: string = 'GET', body?: any): RequestInit => {
   
 export const updateAuthorProfile = async (userId: string, data: { bio?: string; avatar?: string }) => {  
   try {  
-    const response = await fetch(`${API_URL}/users/${userId}`, getRequestOptions('PUT', data));  
+    const response = await fetch(`${API_URL}/api/users/${userId}`, getRequestOptions('PUT', data));  
     const result = await response.json();  
     return result;  
   } catch (error) {  
@@ -31,7 +31,7 @@ export const updateAuthorProfile = async (userId: string, data: { bio?: string; 
 // Additional helper that might be useful  
 export const getUserProfile = async (userId: string) => {  
   try {  
-    const response = await fetch(`${API_URL}/users/${userId}`, getRequestOptions());  
+    const response = await fetch(`${API_URL}/api/users/${userId}`, getRequestOptions());  
     return await response.json();  
   } catch (error) {  
     console.error('Error fetching user profile:', error);  
@@ -41,7 +41,7 @@ export const getUserProfile = async (userId: string) => {
   
 export const getAllAuthors = async () => {  
   try {  
-    const response = await fetch(`${API_URL}/users`, getRequestOptions());  
+    const response = await fetch(`${API_URL}/api/users`, getRequestOptions());  
     const result = await response.json();  
   
     // The backend returns { success: true, data: { users, pagination, statistics } }  
@@ -62,8 +62,8 @@ export const getAllAuthors = async () => {
   
 export const createAuthor = async (userData: { username: string; email: string; password?: string; role?: string }) => {  
   try {  
-    // Use admin register endpoint for creating authors  
-    const response = await fetch(`${API_URL}/auth/admin/register`, getRequestOptions('POST', userData));  
+    // Use the correct admin endpoint for creating users  
+    const response = await fetch(`${API_URL}/api/admin/users`, getRequestOptions('POST', userData));  
     return await response.json();  
   } catch (error) {  
     console.error('Error creating author:', error);  
@@ -73,7 +73,7 @@ export const createAuthor = async (userData: { username: string; email: string; 
   
 export const deleteAuthor = async (userId: string) => {  
   try {  
-    const response = await fetch(`${API_URL}/users/${userId}`, getRequestOptions('DELETE'));  
+    const response = await fetch(`${API_URL}/api/users/${userId}`, getRequestOptions('DELETE'));  
   
     const result = await response.json();  
   
