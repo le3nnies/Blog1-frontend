@@ -33,7 +33,7 @@ import { articleService } from "@/services/articleService";
 import { apiService } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 
-const API_URL = import.meta.env.REACT_APP_API_BASE_URL;
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 interface Author {
   _id: string;
