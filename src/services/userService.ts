@@ -1,28 +1,26 @@
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
-// Helper function to get request options with cookie-based authentication  
-const getRequestOptions = (method: string = 'GET', body?: any): RequestInit => {  
-  const options: RequestInit = {  
-    method,  
-    credentials: 'include', // Include cookies for authentication  
-    headers: {  
-      'Content-Type': 'application/json',  
-    },  
-  };  
-  
-  if (body) {  
-    options.body = JSON.stringify(body);  
-  }  
-  
-  return options;  
-};  
+// Helper function to get request options with cookie-based authentication
+const getRequestOptions = (method: string = 'GET', body?: any): RequestInit => {
+  const options: RequestInit = {
+    method,
+    credentials: 'include', // Include cookies for authentication
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
+
+  if (body) {
+    options.body = JSON.stringify(body);
+  }
+
+  return options;
+};
 
 export const updateAuthorProfile = async (userId: string, data: { bio?: string; avatar?: string }) => {
   try {
     const response = await fetch(`${API_URL}/users/${userId}`, {
-      method: 'PUT',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(data),
+      ...getRequestOptions('PUT', data),
     });
 
     const result = await response.json();
@@ -37,7 +35,7 @@ export const updateAuthorProfile = async (userId: string, data: { bio?: string; 
 export const getUserProfile = async (userId: string) => {
   try {
     const response = await fetch(`${API_URL}/users/${userId}`, {
-      headers: getAuthHeaders(),
+      ...getRequestOptions(),
     });
     return await response.json();
   } catch (error) {
@@ -49,7 +47,7 @@ export const getUserProfile = async (userId: string) => {
 export const getAllAuthors = async () => {
   try {
     const response = await fetch(`${API_URL}/users`, {
-      headers: getAuthHeaders(),
+      ...getRequestOptions(),
     });
     const result = await response.json();
 
@@ -73,9 +71,7 @@ export const createAuthor = async (userData: { username: string; email: string; 
   try {
     // Use admin register endpoint for creating authors
     const response = await fetch(`${API_URL}/auth/admin/register`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(userData),
+      ...getRequestOptions('POST', userData),
     });
     return await response.json();
   } catch (error) {
@@ -87,8 +83,7 @@ export const createAuthor = async (userData: { username: string; email: string; 
 export const deleteAuthor = async (userId: string) => {
   try {
     const response = await fetch(`${API_URL}/users/${userId}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders(),
+      ...getRequestOptions('DELETE'),
     });
 
     const result = await response.json();
