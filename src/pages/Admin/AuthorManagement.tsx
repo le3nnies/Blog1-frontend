@@ -32,6 +32,7 @@ import { useToast } from "@/hooks/use-toast";
 import { articleService } from "@/services/articleService";
 import { apiService } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
+import userService from "@/services/userService";  
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -178,34 +179,34 @@ export default function AuthorManagement() {
     }
   };
 
-  const handleAddAuthor = async () => {
-    if (!newAuthorData.username || !newAuthorData.email || !newAuthorData.password || !newAuthorData.bio) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields including bio",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setUpdating(true);
-      const { data: response } = await apiService.auth.register(newAuthorData);
-
-      if (response.success) {
-        toast({ title: "Success", description: "Author created successfully" });
-        setShowAddAuthorDialog(false);
-        setNewAuthorData({ username: '', email: '', password: '', bio: '', role: 'author' });
-        loadAuthors();
-      } else {
-        toast({ title: "Error", description: response.error || "Failed to create author", variant: "destructive" });
-      }
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message || "Failed to create author", variant: "destructive" });
-    } finally {
-      setUpdating(false);
-    }
-  };
+  const handleAddAuthor = async () => {  
+  if (!newAuthorData.username || !newAuthorData.email || !newAuthorData.password || !newAuthorData.bio) {  
+    toast({  
+      title: "Validation Error",  
+      description: "Please fill in all required fields including bio",  
+      variant: "destructive",  
+    });  
+    return;  
+  }  
+  
+  try {  
+    setUpdating(true);  
+    const response = await userService.createAuthor(newAuthorData);  
+      
+    if (response.success) {  
+      toast({ title: "Success", description: "Author created successfully" });  
+      setShowAddAuthorDialog(false);  
+      setNewAuthorData({ username: '', email: '', password: '', bio: '', role: 'author' });  
+      loadAuthors();  
+    } else {  
+      toast({ title: "Error", description: response.error || "Failed to create author", variant: "destructive" });  
+    }  
+  } catch (error: any) {  
+    toast({ title: "Error", description: error.message || "Failed to create author", variant: "destructive" });  
+  } finally {  
+    setUpdating(false);  
+  }  
+};
 
   const handleChangeArticleAuthor = async () => {
     if (!selectedArticle || !selectedArticle.id || !newAuthorId) return;
