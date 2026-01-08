@@ -62,8 +62,8 @@ export const getAllAuthors = async () => {
   
 export const createAuthor = async (userData: { username: string; email: string; password?: string; role?: string }) => {  
   try {  
-    // Use the correct admin endpoint for creating users  
-    const response = await fetch(`${API_URL}/api/admin/users`, getRequestOptions('POST', userData));  
+    // Use the public register endpoint - it accepts role assignment  
+    const response = await fetch(`${API_URL}/api/auth/register`, getRequestOptions('POST', userData));  
     return await response.json();  
   } catch (error) {  
     console.error('Error creating author:', error);  
