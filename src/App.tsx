@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
+import { Analytics } from "@vercel/analytics/react";
 import Home from "./pages/Home";
 import Article from "./pages/Article";
 import Category from "./pages/Category";
@@ -14,7 +15,7 @@ import AdsDashboard from "./pages/Admin/AdsDashboard";
 import AdCampaignForm from "./pages/Admin/AdCampaignForm";
 import AdCampaignView from "./pages/Admin/AdCampaignView"; 
 import AdsSettings from "./pages/Admin/AdsSettings";
-import Analytics from "./pages/Admin/Analytics";
+import AnalyticsPage from "./pages/Admin/Analytics";
 import AuthorManagement from "./pages/Admin/AuthorManagement";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -48,6 +49,7 @@ const App = () => (
         <BrowserRouter>
         {/* Wrap everything with AuthProvider */}
         <AuthProvider>
+          <Analytics />
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<Home />} />
@@ -140,7 +142,7 @@ const App = () => (
               path="/admin/analytics"
               element={
                 <ProtectedRoute>
-                  <Analytics />
+                  <AnalyticsPage />
                 </ProtectedRoute>
               }
             />
