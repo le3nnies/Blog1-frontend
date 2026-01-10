@@ -39,7 +39,7 @@ export const apiService = {
   // Auth endpoints  
   auth: {  
     login: (credentials) => api.post('/api/auth/login', credentials),  
-    register: (userData) => api.post('/api/auth/register', userData),  
+    register: (userData) => api.post('/api/auth/admin/register', userData),  
     logout: () => api.post('/api/auth/logout'),  
     getProfile: () => api.get('/api/auth/me'),  
     updateProfile: (data) => api.put('/api/auth/profile', data),  
